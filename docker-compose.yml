@@ -1,0 +1,44 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: pizzadb
+      POSTGRES_USER: pizza
+      POSTGRES_PASSWORD: pizza
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pizza -d pizzadb"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  app:
+    build: .
+    environment:
+      DB_HOST: db
+      DB_PORT: "5432"
+      DB_NAME: pizzadb
+      DB_USER: pizza
+      DB_PASSWORD: pizza
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+  ui:
+    build:
+      context: ./frontend
+    environment:
+      PROXY_TARGET: http://app:8080
+
+    ports:
+      - "5173:5173"
+    depends_on:
+      - app
+
+
+volumes:
+  pgdata: {}
