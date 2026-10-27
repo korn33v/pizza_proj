@@ -35,6 +35,17 @@ public class OrderEntity {
   @Column(name = "status", nullable = false, length = 30)
   private String status;
 
+  @Column(name = "cancellation_reason", length = 1000)
+  private String cancellationReason;
+
+  public String getCancellationReason() {
+    return cancellationReason;
+  }
+
+  public void setCancellationReason(String cancellationReason) {
+    this.cancellationReason = cancellationReason;
+  }
+
   @Column(name = "delivery_zone", nullable = false, length = 50)
   private String deliveryZone;
 

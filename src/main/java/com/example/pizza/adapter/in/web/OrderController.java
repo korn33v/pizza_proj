@@ -12,6 +12,11 @@ import com.example.pizza.application.port.in.command.ChangeOrderStatusCommand;
 import com.example.pizza.application.port.in.command.CreateOrderCommand;
 import com.example.pizza.application.port.in.command.GetOrderQuery;
 import com.example.pizza.application.port.in.result.OrderResult;
+import com.example.pizza.application.port.in.CancelOrderUseCase;
+import com.example.pizza.application.port.in.command.CancelOrderCommand;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,17 +35,20 @@ public class OrderController {
   private final ChangeOrderStatusUseCase changeOrderStatusUseCase;
   private final GetOrderUseCase getOrderUseCase;
   private final ListOrdersUseCase listOrdersUseCase;
+  private final CancelOrderUseCase cancelOrderUseCase;
 
   public OrderController(
       CreateOrderUseCase createOrderUseCase,
       ChangeOrderStatusUseCase changeOrderStatusUseCase,
       GetOrderUseCase getOrderUseCase,
-      ListOrdersUseCase listOrdersUseCase
+      ListOrdersUseCase listOrdersUseCase,
+      CancelOrderUseCase cancelOrderUseCase
   ) {
     this.createOrderUseCase = createOrderUseCase;
     this.changeOrderStatusUseCase = changeOrderStatusUseCase;
     this.getOrderUseCase = getOrderUseCase;
     this.listOrdersUseCase = listOrdersUseCase;
+    this.cancelOrderUseCase = cancelOrderUseCase;
   }
 
   @PostMapping
@@ -52,6 +60,23 @@ public class OrderController {
     return ResponseEntity
         .created(URI.create("/orders/" + response.id()))
         .body(response);
+  }
+
+  @Operation(summary = "Отменить ошибочный заказ по обращению пользователя",
+      description = "Переводит заказ в CANCELLED, сохраняя причину и историю. "
+          + "Разрешено для CREATED, PAID и COOKING. Повторная отмена с той же причиной возвращает 204.")
+  @ApiResponse(responseCode = "204", description = "Заказ отменён")
+  @ApiResponse(responseCode = "400", description = "Некорректный UUID или причина (нужно от 1 до 1000 символов)")
+  @ApiResponse(responseCode = "404", description = "Заказ не найден")
+  @ApiResponse(responseCode = "409", description = "Отмена запрещена для текущего статуса или уже сохранена другая причина")
+  @DeleteMapping("/{orderId}")
+  public ResponseEntity<Void> cancel(
+      @Parameter(description = "Номер заказа (UUID)", required = true)
+      @PathVariable("orderId") UUID orderId,
+      @Parameter(description = "Причина отмены, от 1 до 1000 символов", required = true)
+      @RequestParam("reason") String reason) {
+    cancelOrderUseCase.cancel(new CancelOrderCommand(orderId, reason));
+    return ResponseEntity.noContent().build();
   }
 
   @PatchMapping("/{id}/status")
@@ -114,7 +139,8 @@ public class OrderController {
         result.status(),
         result.totalPrice().amount(),
         result.totalPrice().currency(),
-        result.deliveryZone()
+        result.deliveryZone(),
+        result.cancellationReason()
     );
   }
 

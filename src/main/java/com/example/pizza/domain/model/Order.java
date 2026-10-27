@@ -15,8 +15,14 @@ public record Order(
     Address address,
     OrderStatus status,
     Money totalPrice,
-    String deliveryZone
+    String deliveryZone,
+    String cancellationReason
 ) {
+
+  public Order(UUID id, List<PizzaItem> items, Address address, OrderStatus status,
+               Money totalPrice, String deliveryZone) {
+    this(id, items, address, status, totalPrice, deliveryZone, null);
+  }
 
   public Order {
     Objects.requireNonNull(id, "id");
@@ -36,7 +42,15 @@ public record Order(
   }
 
   public Order withStatus(OrderStatus newStatus) {
-    return new Order(this.id, this.items, this.address, newStatus, this.totalPrice, this.deliveryZone);
+    return new Order(this.id, this.items, this.address, newStatus, this.totalPrice, this.deliveryZone, this.cancellationReason);
+  }
+
+  public Order cancel(String reason, OrderStatusTransitionPolicy transitionPolicy) {
+    if (reason == null || reason.isBlank() || reason.strip().length() > 1000) {
+      throw new IllegalArgumentException("Cancellation reason must contain 1 to 1000 characters");
+    }
+    transitionPolicy.assertCanTransition(this.status, OrderStatus.CANCELLED);
+    return new Order(id, items, address, OrderStatus.CANCELLED, totalPrice, deliveryZone, reason.strip());
   }
 
   public Order markPaid(OrderStatusTransitionPolicy transitionPolicy) {

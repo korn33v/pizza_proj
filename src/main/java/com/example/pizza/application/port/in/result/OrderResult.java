@@ -16,7 +16,8 @@ public record OrderResult(
     List<ItemResult> items,
     String status,
     MoneyResult totalPrice,
-    String deliveryZone
+    String deliveryZone,
+    String cancellationReason
 ) {
 
   public static OrderResult fromDomain(Order order) {
@@ -26,7 +27,8 @@ public record OrderResult(
         order.items().stream().map(ItemResult::fromDomain).toList(),
         order.status().name(),
         MoneyResult.fromDomain(order.totalPrice()),
-        order.deliveryZone()
+        order.deliveryZone(),
+        order.cancellationReason()
     );
   }
 

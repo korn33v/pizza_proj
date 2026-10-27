@@ -1,5 +1,7 @@
 package com.example.pizza.infrastructure.config;
 
+import com.example.pizza.application.port.in.CancelOrderUseCase;
+import com.example.pizza.application.service.CancelOrderInteractor;
 import com.example.pizza.adapter.out.external.DeliveryZoneStubAdapter;
 import com.example.pizza.adapter.out.persistence.OrderPersistenceAdapter;
 import com.example.pizza.adapter.out.persistence.entity.OrderEntity;
@@ -87,6 +89,11 @@ public class ApplicationWiringConfig {
     return new ChangeOrderStatusInteractor(repo, policy);
   }
 
+
+  @Bean
+  public CancelOrderUseCase cancelOrderUseCase(OrderRepositoryPort repo, OrderStatusTransitionPolicy policy) {
+    return new CancelOrderInteractor(repo, policy);
+  }
 
   @Bean
   public ListOrdersUseCase listOrdersUseCase(OrderRepositoryPort repo) {

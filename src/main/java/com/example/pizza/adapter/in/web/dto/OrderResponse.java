@@ -11,5 +11,6 @@ public record OrderResponse(
     String status,
     BigDecimal totalAmount,
     String currency,
-    String deliveryZone
+    String deliveryZone,
+    String cancellationReason
 ) {}
