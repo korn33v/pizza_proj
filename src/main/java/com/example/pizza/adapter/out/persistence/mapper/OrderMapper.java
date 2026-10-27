@@ -26,6 +26,7 @@ public final class OrderMapper {
     e.setPostcode(domain.address().postcode());
 
     e.setStatus(domain.status().name());
+    e.setCancellationReason(domain.cancellationReason());
     e.setDeliveryZone(domain.deliveryZone());
 
     e.setTotalAmount(domain.totalPrice().amount());
@@ -64,7 +65,8 @@ public final class OrderMapper {
         address,
         OrderStatus.valueOf(e.getStatus()),
         total,
-        e.getDeliveryZone()
+        e.getDeliveryZone(),
+        e.getCancellationReason()
     );
   }
 

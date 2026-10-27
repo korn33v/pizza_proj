@@ -29,6 +29,13 @@ public class WebExceptionHandler {
     return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiError.of(HttpStatus.CONFLICT, ex.getMessage(), req.getRequestURI()));
   }
 
+  @ExceptionHandler({org.springframework.web.bind.MissingServletRequestParameterException.class,
+      org.springframework.web.method.annotation.MethodArgumentTypeMismatchException.class})
+  public ResponseEntity<ApiError> handleInvalidParameter(Exception ex, HttpServletRequest req) {
+    return ResponseEntity.badRequest().body(ApiError.of(HttpStatus.BAD_REQUEST,
+        "Missing or invalid request parameter", req.getRequestURI()));
+  }
+
   @ExceptionHandler(IllegalArgumentException.class)
   public ResponseEntity<ApiError> handleBadRequest(IllegalArgumentException ex, HttpServletRequest req) {
     return ResponseEntity.badRequest().body(ApiError.of(HttpStatus.BAD_REQUEST, ex.getMessage(), req.getRequestURI()));
