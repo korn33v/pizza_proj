@@ -91,6 +91,12 @@ public class ApplicationWiringConfig {
 
 
   @Bean
+  public com.example.pizza.application.port.in.RemoveOrderUseCase removeOrderUseCase(
+      OrderRepositoryPort repo, OrderStatusTransitionPolicy policy) {
+    return new com.example.pizza.application.service.RemoveOrderInteractor(repo, policy);
+  }
+
+  @Bean
   public CancelOrderUseCase cancelOrderUseCase(OrderRepositoryPort repo, OrderStatusTransitionPolicy policy) {
     return new CancelOrderInteractor(repo, policy);
   }

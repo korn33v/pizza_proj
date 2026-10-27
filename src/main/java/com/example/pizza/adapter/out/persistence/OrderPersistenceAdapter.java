@@ -47,6 +47,13 @@ public class OrderPersistenceAdapter implements OrderRepositoryPort {
     return jpaRepository.findAll().stream().map(mapper::toDomain).toList();
   }
 
+  @Override
+  @Transactional
+  public void remove(UUID id) {
+    // JPA cascade removes order_items together with the order in one transaction.
+    jpaRepository.deleteById(id);
+  }
+
   // FAQ:
   // Q: Почему @Transactional здесь, а не в interactor?
   // A: Потому что interactor — чистая Java. Транзакции завязаны на Spring/JPA => внешний слой. См. [SEMINAR-18].
